@@ -1,20 +1,52 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import SignIn from './SignIn';
+import SignUp from './SignUp';
+import Welcome from './Welcome';
+import Home from './Home';
+import Chat from './Chat';
+import MyProfile from './MyProfile';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationContainer } from '@react-navigation/native';
+
+const Stack = createNativeStackNavigator();
+
+async function checkUser() {
+  const user = await AsyncStorage.getItem('user');
+  return user;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function App() {
+  const [initialRoute, setInitialRoute] = useState(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const user = await AsyncStorage.getItem('user');
+      setInitialRoute(user ? 'Home' : 'Sign In');
+    }
+
+    fetchUser();
+  }, []);
+
+  if (!initialRoute) {
+    return null;
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName={checkUser != null ? "Welcome" : "Sign In"}>
+        <Stack.Screen name="Sign In" component={SignIn} options={{ headerShown: false }} />
+        <Stack.Screen name="Sign Up" component={SignUp} options={{ headerShown: false }} />
+        <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
+        <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />
+        <Stack.Screen name="Chat" component={Chat} options={{ headerShown: false }} />
+        <Stack.Screen name="MyProfile" component={MyProfile} options={{ headerShown: false }} />
+
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+export default App;
+
